@@ -1,0 +1,11 @@
+language: php
+php:
+  - '5.6'
+script:
+  - sed -i 's/OAUTH_TOKEN/$OAUTH_TOKEN/g' GithubToSlack.php
+  - sed -i 's/REPO_NAME/$REPO_NAME/g' GithubToSlack.php
+  - sed -i 's/REPO_OWNER/$REPO_OWNER/g' GithubToSlack.php
+  - sed -i 's/SLACK_WEBHOOK/$SLACK_WEBHOOK/g' GithubToSlack.php
+  - sed -i 's/USER_AGENT/$USER_AGENT/g' GithubToSlack.php
+deploy:
+  - curl --ftp-create-dirs -T 'GithubToSlack.php' -u $FTP_USERNAME:$FTP_PASSWORD $CURL_TARGET/test/push.php
