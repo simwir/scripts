@@ -49,6 +49,7 @@ if($string !== NULL){
 			foreach($commit_info['files'] as $file){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
+					$line = remove_todos($line);
 					if(str_split($line)[0] === '+'){
 						if(preg_match('/[\s+][mM]an[\W]/', $line)  === 1){
 							$man_lines[] = $line;
@@ -106,5 +107,48 @@ function formatLines($lines, $output){
 		}
 	}
 	return $output;
+}
+function char_at($str, $pos) {
+    return mb_substr($str, $pos, 1);
+}
+
+function remove_todos($line) {
+    $len = strlen($line);
+    $pos = strpos($line, "\\todo");
+    $stack = new SplStack();
+    $startparens = "([{";
+    $endparens = ")]}";
+    while (strpos($line, "\\todo") !== false && $pos < $len) {
+        echo($line);
+        echo(sprintf("pos == %s\n", $pos));
+        $startpos = $pos;
+        /* Skip to first parenthesis */
+        while (strpos($startparens, char_at($line, $pos)) === false) {
+            $pos++;
+        }
+        /* Skip optional parameters */
+        if (char_at($line, $pos) == "[") {
+            while (char_at($line, $pos) !== "]") {
+                $pos++;
+            }
+            if ($stack->top() !== char_at($line, $pos)) {
+                trigger_error("Parenthesis mismatch");
+            }
+            $stack->pop();
+        }
+        $stack[] = mb_substr($line, $pos, $pos+1);
+        while (!$stack->isEmpty()) {
+            $pos++;
+            if (strpos($startparens, char_at($line, $pos)) !== false) {
+                $stack[] = char_at($line, $pos);
+            }
+            elseif (strpos($endparens, char_at($line, $pos)) !== false) {
+                $stack->pop();
+            }
+        }
+        $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
+        $pos = strpos($line, "\\todo");
+    }
+    return $line;
 }
 ?>
