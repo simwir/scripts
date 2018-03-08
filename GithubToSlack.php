@@ -131,22 +131,23 @@ function remove_todos($line) {
             while (char_at($line, $pos) !== "]") {
                 $pos++;
             }
-            if ($stack->top() !== char_at($line, $pos)) {
-                trigger_error("Parenthesis mismatch");
-            }
-            $stack->pop();
+            echo(sprintf("charat pos %d == %s", $pos, char_at($line, $pos)));
+            $pos++;
+            //$stack->pop();
         }
-        $stack[] = mb_substr($line, $pos, $pos+1);
+        $stack->push(mb_substr($line, $pos, $pos+1));
         while (!$stack->isEmpty()) {
             $pos++;
-            if (strpos($startparens, char_at($line, $pos)) !== false) {
-                $stack[] = char_at($line, $pos);
+            if (char_at($line, $pos) === "{") {
+                $stack->push(char_at($line, $pos));
             }
-            elseif (strpos($endparens, char_at($line, $pos)) !== false) {
+            elseif (char_at($line, $pos) === "}") {
                 $stack->pop();
             }
         }
+        echo(sprintf("Substring \"%s\" at pos %d to %d\n", $line, $startpos, $pos));
         $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
+        echo(sprintf("After removal: %s\n", $line));
         $pos = strpos($line, "\\todo");
     }
     return $line;
