@@ -49,9 +49,11 @@ if($string !== NULL){
 			foreach($commit_info['files'] as $file){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
-					if(str_split($line)[0] === '+'){
-						if(preg_match('/[\s+][mM]an[\W]/', $line)  === 1){
-							$man_lines[] = $line;
+					$line = str_replace("\\", "\\\\", $line);
+					$filtered_line = remove_todos($line);
+					if(str_split($filtered_line)[0] === '+'){
+						if(preg_match('/[\s+][mM]an[\W]/', $filtered_line)  === 1){
+							$man_lines[] = $filtered_line;
 							echo $line;
 						}
 						/*if(preg_match('/[\s+][Vv]i\W/', $line)  === 1){
@@ -106,5 +108,53 @@ function formatLines($lines, $output){
 		}
 	}
 	return $output;
+}
+function char_at($str, $pos) {
+    return mb_substr($str, $pos, 1);
+}
+
+function remove_todos($line) {
+    $len = strlen($line);
+    $pos = strpos($line, "\\todo");
+    $stack = new SplStack();
+    $startparens = "([{";
+    $endparens = ")]}";
+    while (strpos($line, "\\todo") !== false && $pos < $len) {
+        echo($line);
+        echo(sprintf("pos == %s\n", $pos));
+        $startpos = $pos;
+        /* Skip to first parenthesis */
+        while (strpos($startparens, char_at($line, $pos)) === false) {
+            $pos++;
+        }
+        /* Skip optional parameters */
+        if (char_at($line, $pos) == "[") {
+            while (char_at($line, $pos) !== "]") {
+                $pos++;
+            }
+            echo(sprintf("charat pos %d == %s", $pos, char_at($line, $pos)));
+            $pos++;
+            //$stack->pop();
+        }
+        //Skip to opening brace
+        while (char_at($line, $pos) !== "{") {
+            $pos++;
+        }
+        $stack->push(mb_substr($line, $pos, $pos+1));
+        while (!$stack->isEmpty()) {
+            $pos++;
+            if (char_at($line, $pos) === "{") {
+                $stack->push(char_at($line, $pos));
+            }
+            elseif (char_at($line, $pos) === "}") {
+                $stack->pop();
+            }
+        }
+        echo(sprintf("Substring \"%s\" at pos %d to %d\n", $line, $startpos, $pos));
+        $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
+        echo(sprintf("After removal: %s\n", $line));
+        $pos = strpos($line, "\\todo");
+    }
+    return $line;
 }
 ?>
