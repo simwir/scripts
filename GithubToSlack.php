@@ -50,10 +50,10 @@ if($string !== NULL){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
 					$line = str_replace("\\", "\\\\", $line);
-					$line = remove_todos($line);
-					if(str_split($line)[0] === '+'){
-						if(preg_match('/[\s+][mM]an[\W]/', $line)  === 1){
-							$man_lines[] = $line;
+					$filtered_line = remove_todos($line);
+					if(str_split($filtered_line)[0] === '+'){
+						if(preg_match('/[\s+][mM]an[\W]/', $filtered_line)  === 1){
+							$man_lines[] = $filtered_line;
 							echo $line;
 						}
 						/*if(preg_match('/[\s+][Vv]i\W/', $line)  === 1){
@@ -135,6 +135,10 @@ function remove_todos($line) {
             echo(sprintf("charat pos %d == %s", $pos, char_at($line, $pos)));
             $pos++;
             //$stack->pop();
+        }
+        //Skip to opening brace
+        while (char_at($line, $pos) !== "{") {
+            $pos++;
         }
         $stack->push(mb_substr($line, $pos, $pos+1));
         while (!$stack->isEmpty()) {
