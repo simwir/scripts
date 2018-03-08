@@ -49,6 +49,7 @@ if($string !== NULL){
 			foreach($commit_info['files'] as $file){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
+					$line = str_replace("\\", "\\\\", $line);
 					$line = remove_todos($line);
 					if(str_split($line)[0] === '+'){
 						if(preg_match('/[\s+][mM]an[\W]/', $line)  === 1){
