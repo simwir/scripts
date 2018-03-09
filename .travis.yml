@@ -11,4 +11,4 @@ script:
   - sed -i "s:SLACK_WEBHOOK:$SLACK_WEBHOOK:g" GithubToSlack.php
   - sed -i "s/USER_AGENT/$USER_AGENT/g" GithubToSlack.php
 after_success:
-  - curl --ftp-create-dirs -T 'GithubToSlack.php' -u $FTP_USERNAME:$FTP_PASSWORD $CURL_TARGET/test/push.php
+  - curl --ftp-create-dirs -T 'GithubToSlack.php' -u $FTP_USERNAME:$FTP_PASSWORD $CURL_TARGET/push.php
