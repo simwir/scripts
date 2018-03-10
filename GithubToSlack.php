@@ -114,46 +114,37 @@ function char_at($str, $pos) {
 }
 
 function remove_todos($line) {
-    $len = strlen($line);
-    $pos = strpos($line, "\\todo");
+    $len = mb_strlen($line);
+    $pos = mb_strpos($line, "\\todo");
     $stack = new SplStack();
-    $startparens = "([{";
-    $endparens = ")]}";
-    while (strpos($line, "\\todo") !== false && $pos < $len) {
-        echo($line);
+    while ($pos < $len && $pos !== false  ) {
+        echo($line."\n");
         echo(sprintf("pos == %s\n", $pos));
         $startpos = $pos;
-        /* Skip to first parenthesis */
-        while (strpos($startparens, char_at($line, $pos)) === false) {
-            $pos++;
-        }
-        /* Skip optional parameters */
-        if (char_at($line, $pos) == "[") {
-            while (char_at($line, $pos) !== "]") {
-                $pos++;
-            }
-            echo(sprintf("charat pos %d == %s", $pos, char_at($line, $pos)));
-            $pos++;
-            //$stack->pop();
-        }
+        echo("Character at pos: ".char_at($line,$pos)."\n");
+        echo("Startpos = ".$startpos."\n");
         //Skip to opening brace
         while (char_at($line, $pos) !== "{") {
             $pos++;
         }
-        $stack->push(mb_substr($line, $pos, $pos+1));
+        //Use stack to track opened braces.
+        $stack->push(char_at($line, $pos));
+        //Stack should be empty on closing brace.
         while (!$stack->isEmpty()) {
             $pos++;
             if (char_at($line, $pos) === "{") {
                 $stack->push(char_at($line, $pos));
             }
-            elseif (char_at($line, $pos) === "}") {
+			elseif (char_at($line, $pos) === "}") {
                 $stack->pop();
             }
         }
         echo(sprintf("Substring \"%s\" at pos %d to %d\n", $line, $startpos, $pos));
+        //Remove contents
         $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
         echo(sprintf("After removal: %s\n", $line));
-        $pos = strpos($line, "\\todo");
+        //Setup for next iteration
+        $pos = mb_strpos($line, "\\todo");
     }
     return $line;
 }
