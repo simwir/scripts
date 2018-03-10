@@ -10,13 +10,7 @@ function char_at($str, $pos) {
     return mb_substr($str, $pos, 1);
 }
 
-function remove_todos($line)
-{
-    return remove_todos_old($line);
-}
-
-
-function remove_todos_old($line) {
+function remove_todos($line) {
     $len = mb_strlen($line);
     $pos = mb_strpos($line, "\\todo");
     $stack = new SplStack();
@@ -65,34 +59,6 @@ function remove_todos_old($line) {
     }
     return $line;
 }
-function remove_todos_new($line)
-{
-    $len = strlen($line);
-    $pos = strpos($line, '\todo');
-    $stack = new SplStack();
-    while ($pos < $len && $pos !== false) {
-        echo("Todo found in line ".$line."\n");
-        $todoPos = $pos;
-        $bracePos = strpos($line, '{', $pos);
-        $pos = $bracePos;
-        $stack->push(char_at($line, $pos));
-        while (!$stack->isEmpty()) {
-            $pos++;
-            if (char_at($line, $pos) === '{') {
-                $stack->push('{');
-            }
-            if (char_at($line, $pos) === '}') {
-                $stack->pop();
-            }
-        }
-        $line = str_replace(mb_substr($line, $todoPos, $pos - $todoPos + 1), "", $line);
-        $pos = strpos($line, '\todo');
-        echo("Post removal: ".$line."\n");
-    }
-    return $line;
-}
-
-
 function manhunt($line) {
     $line = str_replace("\t", "\\t",$line);
     echo(sprintf("Filtered line: %s\n", $line));
