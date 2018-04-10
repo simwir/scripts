@@ -25,8 +25,8 @@ SOFTWARE.
 /*
 This script acts as a webhook from github and if certain criteria is met it pushes a message to a slack webhook.
 */
-$owner = ":owner";//Insert the name of the owner of the repo here.
-$repo = ";repo";//Insert the repo name here
+$owner = "REPO_OWNER";//Insert the name of the owner of the repo here.
+$repo = "REPO_NAME";//Insert the repo name here
 $string = file_get_contents('php://input');
 if($string !== NULL){
 	
@@ -36,9 +36,9 @@ if($string !== NULL){
 	
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch, CURLOPT_HTTPHEADER, array(	"Authorization: token OAUTH-TOKEN",//Insert oauth token here
+	curl_setopt($ch, CURLOPT_HTTPHEADER, array(	"Authorization: token OAUTH_TOKEN",//Insert oauth token here
 												"Accept: application/vnd.github.v3+json",
-												"User-Agent: USER-AGENT"));//Insert an user agent name here
+												"User-Agent: USER_AGENT"));//Insert an user agent name here
 	$man_lines = array();
 	$vi_lines = array();
 	foreach($commits as $commit){
@@ -49,9 +49,9 @@ if($string !== NULL){
 			foreach($commit_info['files'] as $file){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
-					$line = str_replace("\\", "\\\\", $line);
 					$commands = array("\\todo", "\\tanker", "\\brian", "\\brianrettet");
 					$filtered_line = remove_commands($line, $commands);
+					$line = str_replace("\t", "\\t", $line);
 					if(str_split($filtered_line)[0] === '+'){
 						if(preg_match('/[\s+][mM]an[\W]/', $filtered_line)  === 1){
 							$man_lines[] = $filtered_line;
@@ -90,10 +90,10 @@ if($string !== NULL){
 	echo "There was not POST'ed any string.";
 }
 function curlTo($message){
-	$ch = curl_init("https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX");//Insert slack webhook here
+	$ch = curl_init("https://hooks.slack.com/services/SLACK_WEBHOOK");//Insert slack webhook here
 	curl_setopt($ch, CURLOPT_HTTPHEADER, array(	"Content-type: application/json",
 												"Content-Length: ".strlen($message),
-												"User-Agent: USER-AGENT"));//Insert user agent here
+												"User-Agent: USER_AGENT"));//Insert user agent here
 	curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $message);
 	curl_exec($ch);
