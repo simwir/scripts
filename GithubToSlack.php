@@ -50,9 +50,9 @@ if($string !== NULL){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
 					$commands = array("\\todo", "\\tanker", "\\brian", "\\brianrettet");
-					$filtered_line = remove_commands($line, $commands);
-					$line = str_replace("\t", "\\t", $line);
-					if(str_split($filtered_line)[0] === '+'){
+                    $line = str_replace("\t", "\\t", $line);
+                    $filtered_line = remove_commands($line, $commands);
+                    if(str_split($filtered_line)[0] === '+'){
 						if(preg_match('/[\s+][mM]an[\W]/', $filtered_line)  === 1){
 							$man_lines[] = $filtered_line;
 							echo $line;
