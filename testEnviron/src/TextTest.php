@@ -135,6 +135,11 @@ class TextTest extends TestCase
         }
         $this->assertTrue(true);
     }
+    function testMaybeBrokenLine()
+    {
+        $inputstr = "+Ved at implementere disse som standartfunktioner vil man kunne minimere arbejdsbyrden for programmøren.";
+        $this->assertTrue(manhunt($inputstr) !== false);
+    }
 }
 
 

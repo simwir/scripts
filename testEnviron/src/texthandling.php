@@ -6,13 +6,23 @@
  * Time: 11:21 AM
  */
 
+
 function char_at($str, $pos) {
     return mb_substr($str, $pos, 1);
 }
 
-function remove_todos($line) {
+function remove_commands($line, $cmdNames) {
+    for ($i = 0; $i < count($cmdNames); $i++) {
+        remove_command($line, $cmdNames[$i]);
+    }
+    return $line;
+}
+
+function remove_todos($line) { return remove_command($line, "\\todo"); }
+
+function remove_command($line, $cmdname) {
     $len = mb_strlen($line);
-    $pos = mb_strpos($line, "\\todo");
+    $pos = mb_strpos($line, "$cmdname");
     $stack = new SplStack();
     while ($pos < $len && $pos !== false  ) {
         echo($line."\n");
@@ -41,10 +51,15 @@ function remove_todos($line) {
         $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
         echo(sprintf("After removal: %s\n", $line));
         //Setup for next iteration
-        $pos = mb_strpos($line, "\\todo");
+        $pos = mb_strpos($line, "$cmdname");
     }
     return $line;
 }
+
+/**
+ * @param $line
+ * @return false if no man found, otherwise the filtered line.
+ */
 function manhunt($line) {
     $line = str_replace("\t", "\\t",$line);
     echo(sprintf("Filtered line: %s\n", $line));
