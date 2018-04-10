@@ -50,7 +50,8 @@ if($string !== NULL){
 				$lines = explode("\n", $file['patch']);
 				foreach($lines as $line){
 					$line = str_replace("\\", "\\\\", $line);
-					$filtered_line = remove_todos($line);
+					$commands = array("\\todo", "\\tanker", "\\brian", "\\brianrettet");
+					$filtered_line = remove_commands($line, $commands);
 					if(str_split($filtered_line)[0] === '+'){
 						if(preg_match('/[\s+][mM]an[\W]/', $filtered_line)  === 1){
 							$man_lines[] = $filtered_line;
@@ -113,9 +114,18 @@ function char_at($str, $pos) {
     return mb_substr($str, $pos, 1);
 }
 
-function remove_todos($line) {
+function remove_commands($line, $cmdNames) {
+    for ($i = 0; $i < count($cmdNames); $i++) {
+        remove_command($line, $cmdNames[$i]);
+    }
+    return $line;
+}
+
+function remove_todos($line) { return remove_command($line, "\\todo"); }
+
+function remove_command($line, $cmdname) {
     $len = mb_strlen($line);
-    $pos = mb_strpos($line, "\\todo");
+    $pos = mb_strpos($line, "$cmdname");
     $stack = new SplStack();
     while ($pos < $len && $pos !== false  ) {
         echo($line."\n");
@@ -144,7 +154,7 @@ function remove_todos($line) {
         $line = str_replace(mb_substr($line, $startpos, $pos - $startpos + 1), "", $line);
         echo(sprintf("After removal: %s\n", $line));
         //Setup for next iteration
-        $pos = mb_strpos($line, "\\todo");
+        $pos = mb_strpos($line, "$cmdname");
     }
     return $line;
 }
