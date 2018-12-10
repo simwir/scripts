@@ -1,0 +1,75 @@
+#!/SHEBANG
+
+import sys
+import json
+from github import Github
+from slackclient import SlackClient
+
+# This file contains the non public information
+from constants import GITHUB_SLACK_USERS, GITHUB_TOKEN, SLACK_API_KEY, CHANNEL_ID, ERROR_ID
+
+
+def success(s = None):
+    print("Content-Type: text/html")  # HTML is following
+    print()                           # blank line, end of headers
+    if s is not None:
+        print(s)
+    exit(0)
+
+
+raw_message = ""
+
+# noinspection PyBroadException
+try:
+    # Load JSON message from STDIN
+    raw_message = sys.stdin.readlines()
+    message = json.loads("".join(raw_message))
+
+    if message["review"]["state"] != "approved":
+        success()
+
+    github = Github(GITHUB_TOKEN)
+    repo = github.get_repo(message["repository"]["full_name"])
+    pull_request = repo.get_pull(message["pull_request"]["number"])
+    reviews = pull_request.get_reviews()
+    last_state = {}
+    for review in reviews:
+        last_state[review.user.name] = review.state
+
+    if len(last_state) == 5 and all([state == "APPROVED" for state in last_state.values()]):
+        slackClient = SlackClient(SLACK_API_KEY)
+        slackClient.api_call(
+            "chat.postMessage",
+            channel=CHANNEL_ID,
+            icon_emoji=":loud_sound:",
+            text=":tada: <@{}> :tada: Pull request <{}|#{}: {}> har nu 5 approvals.".format(
+                GITHUB_SLACK_USERS[pull_request.user.id],
+                pull_request.html_url,
+                pull_request.number,
+                pull_request.title
+            )
+        )
+
+    success()
+except (KeyboardInterrupt, SystemExit):
+    raise
+except:
+    import traceback
+    e = sys.exc_info()
+    slackClient = SlackClient(SLACK_API_KEY)
+    slackClient.api_call(
+        "chat.postMessage",
+        channel=ERROR_ID,
+        text="An `{}` occurred when trying to process a request.".format(e[0]),
+        attachments=[
+            {
+                "title": "Request",
+                "text": "```\n{}\n```".format(raw_message)
+            },
+            {
+                "title": "Traceback",
+                "text": "```\n{}\n```".format(traceback.format_exc())
+            }
+        ]
+    )
+    success("An error occurred")

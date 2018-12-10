@@ -1,0 +1,6 @@
+constants.py
+test_files/*
+venv/*
+venv36/*
+.idea/*
+__pycache__/*
