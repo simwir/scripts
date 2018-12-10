@@ -34,7 +34,8 @@ try:
     reviews = pull_request.get_reviews()
     last_state = {}
     for review in reviews:
-        last_state[review.user.name] = review.state
+        if review.state != "COMMENTED":
+            last_state[review.user.name] = review.state
 
     if len(last_state) == 5 and all([state == "APPROVED" for state in last_state.values()]):
         slackClient = SlackClient(SLACK_API_KEY)
