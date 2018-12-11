@@ -50,7 +50,7 @@ try:
                 pull_request.title
             )
         )
-        pull_request.set_labels(":tada: 5 approves :tada:")
+        pull_request.add_to_labels(":tada: 5 approves :tada:")
 
     success()
 except (KeyboardInterrupt, SystemExit):
