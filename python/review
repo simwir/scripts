@@ -6,7 +6,7 @@ from github import Github
 from slackclient import SlackClient
 
 # This file contains the non public information
-from constants import GITHUB_SLACK_USERS, GITHUB_TOKEN, SLACK_API_KEY, CHANNEL_ID, ERROR_ID
+from constants import GITHUB_SLACK_USERS, GITHUB_TOKEN, SLACK_API_KEY, CHANNEL_ID, ERROR_ID, APPROVE_THRESHOLD
 
 
 def success(s = None):
@@ -37,20 +37,21 @@ try:
         if review.state != "COMMENTED":
             last_state[review.user.name] = review.state
 
-    if len(last_state) == 5 and all([state == "APPROVED" for state in last_state.values()]):
+    if len(last_state) == APPROVE_THRESHOLD and all([state == "APPROVED" for state in last_state.values()]):
         slackClient = SlackClient(SLACK_API_KEY)
         slackClient.api_call(
             "chat.postMessage",
             channel=CHANNEL_ID,
             icon_emoji=":loud_sound:",
-            text=":tada: <@{}> :tada: Pull request <{}|#{}: {}> har nu 5 approvals.".format(
+            text=":tada: <@{}> :tada: Pull request <{}|#{}: {}> har nu {} approvals.".format(
                 GITHUB_SLACK_USERS[pull_request.user.id],
                 pull_request.html_url,
                 pull_request.number,
-                pull_request.title
+                pull_request.title,
+                APPROVE_THRESHOLD
             )
         )
-        pull_request.add_to_labels(":tada: 5 approves :tada:")
+        pull_request.add_to_labels(":tada: {} approves :tada:".format(APPROVE_THRESHOLD))
 
     success()
 except (KeyboardInterrupt, SystemExit):
