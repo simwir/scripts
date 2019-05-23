@@ -43,7 +43,7 @@ try:
             "chat.postMessage",
             channel=CHANNEL_ID,
             icon_emoji=":loud_sound:",
-            text=":tada: <@{}> :tada: Pull request <{}|#{}: {}> har nu {} approvals.".format(
+            text=":tada: <@{}> :tada: Pull request <{}|#{}: {}> har nu {} approvals. :monkey: :monkey:".format(
                 GITHUB_SLACK_USERS[pull_request.user.id],
                 pull_request.html_url,
                 pull_request.number,
